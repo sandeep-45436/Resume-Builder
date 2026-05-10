@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 export default function Footer() {
     return (
         <footer className="border-t border-stone-200 bg-stone-50 mt-24" data-testid="site-footer">
-            <div className="max-w-7xl mx-auto px-6 lg:px-10 py-16 grid grid-cols-2 md:grid-cols-4 gap-10">
+            <div className="max-w-7xl mx-auto px-6 lg:px-10 py-16 grid grid-cols-2 md:grid-cols-5 gap-10">
                 <div className="col-span-2">
                     <div className="flex items-center gap-2 mb-4">
                         <div className="w-7 h-7 bg-[#002FA7] flex items-center justify-center">
@@ -28,10 +28,19 @@ export default function Footer() {
                 <div>
                     <div className="text-xs uppercase tracking-[0.2em] font-bold text-stone-900 mb-4">Resources</div>
                     <ul className="space-y-2 text-sm text-stone-600">
+                        <li><Link to="/blog" className="hover:text-stone-900">All articles</Link></li>
                         <li><Link to="/blog/resume-tips-for-freshers" className="hover:text-stone-900">Resume tips</Link></li>
                         <li><Link to="/blog/ats-guide-2026" className="hover:text-stone-900">ATS guide</Link></li>
-                        <li><Link to="/blog/common-resume-mistakes" className="hover:text-stone-900">Resume mistakes</Link></li>
                         <li><Link to="/blog/interview-prep" className="hover:text-stone-900">Interview prep</Link></li>
+                    </ul>
+                </div>
+                <div>
+                    <div className="text-xs uppercase tracking-[0.2em] font-bold text-stone-900 mb-4">Company</div>
+                    <ul className="space-y-2 text-sm text-stone-600">
+                        <li><Link to="/about" className="hover:text-stone-900" data-testid="footer-about">About</Link></li>
+                        <li><Link to="/contact" className="hover:text-stone-900" data-testid="footer-contact">Contact</Link></li>
+                        <li><Link to="/privacy" className="hover:text-stone-900" data-testid="footer-privacy">Privacy</Link></li>
+                        <li><Link to="/terms" className="hover:text-stone-900" data-testid="footer-terms">Terms</Link></li>
                     </ul>
                 </div>
             </div>

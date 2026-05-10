@@ -146,6 +146,14 @@ class AITailorIn(BaseModel):
     company: Optional[str] = None
 
 
+class ContactIn(BaseModel):
+    name: str = Field(min_length=1, max_length=120)
+    email: EmailStr
+    subject: Optional[str] = Field(default="General inquiry", max_length=160)
+    message: str = Field(min_length=10, max_length=5000)
+
+
+
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -907,6 +915,44 @@ async def ai_tailor(body: AITailorIn, user: dict = Depends(get_current_user)):
     except Exception as e:
         logger.exception("AI tailor failed")
         raise HTTPException(status_code=502, detail=f"AI generation failed: {e}")
+
+
+# ---------------------------------------------------------------------------
+# Contact
+# ---------------------------------------------------------------------------
+
+@api_router.post("/contact")
+async def contact_submit(body: ContactIn):
+    doc = {
+        "id": str(uuid.uuid4()),
+        "name": body.name.strip(),
+        "email": body.email.lower().strip(),
+        "subject": (body.subject or "General inquiry").strip(),
+        "message": body.message.strip(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.contact_messages.insert_one(doc)
+    # fire-and-forget email notification if Resend configured
+    api_key = os.environ.get("RESEND_API_KEY", "").strip()
+    admin_email = os.environ.get("ADMIN_EMAIL", "admin@resumeforge.ai")
+    if api_key:
+        sender = os.environ.get("SENDER_EMAIL", "onboarding@resend.dev")
+        html = (
+            f"<p><strong>From:</strong> {doc['name']} &lt;{doc['email']}&gt;</p>"
+            f"<p><strong>Subject:</strong> {doc['subject']}</p>"
+            f"<pre style='font-family:IBM Plex Mono,monospace;white-space:pre-wrap;'>{doc['message']}</pre>"
+        )
+        try:
+            resend.api_key = api_key
+            await asyncio.to_thread(
+                resend.Emails.send,
+                {"from": sender, "to": [admin_email], "reply_to": doc["email"], "subject": f"[Contact] {doc['subject']}", "html": html},
+            )
+        except Exception as e:
+            logger.exception(f"Contact email failed: {e}")
+    else:
+        logger.info(f"[contact-stub] {doc['email']} ({doc['name']}): {doc['subject']} — stored, not emailed")
+    return {"ok": True}
 
 
 # ---------------------------------------------------------------------------

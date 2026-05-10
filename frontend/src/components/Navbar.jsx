@@ -31,7 +31,9 @@ export default function Navbar() {
 
                 <nav className="hidden md:flex items-center gap-8">
                     <NavLink to="/" end className={linkCls}>Home</NavLink>
+                    <NavLink to="/about" className={linkCls} data-testid="nav-about">About</NavLink>
                     <NavLink to="/blog" className={linkCls}>Resources</NavLink>
+                    <NavLink to="/contact" className={linkCls} data-testid="nav-contact">Contact</NavLink>
                     {user && <NavLink to="/dashboard" className={linkCls} data-testid="nav-dashboard">Resumes</NavLink>}
                     {user && <NavLink to="/cover-letters" className={linkCls} data-testid="nav-cover-letters">Letters</NavLink>}
                 </nav>
@@ -79,7 +81,9 @@ export default function Navbar() {
                 <div className="md:hidden border-t border-stone-200 bg-white">
                     <div className="px-6 py-4 flex flex-col gap-3">
                         <Link to="/" onClick={() => setOpen(false)} className="py-2">Home</Link>
+                        <Link to="/about" onClick={() => setOpen(false)} className="py-2">About</Link>
                         <Link to="/blog" onClick={() => setOpen(false)} className="py-2">Resources</Link>
+                        <Link to="/contact" onClick={() => setOpen(false)} className="py-2">Contact</Link>
                         {user ? (
                             <>
                                 <Link to="/dashboard" onClick={() => setOpen(false)} className="py-2">Resumes</Link>

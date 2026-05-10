@@ -15,6 +15,10 @@ import CoverLetterBuilder from "@/pages/CoverLetterBuilder";
 import PublicView from "@/pages/PublicView";
 import Blog from "@/pages/Blog";
 import BlogDetail from "@/pages/BlogDetail";
+import About from "@/pages/About";
+import Contact from "@/pages/Contact";
+import Privacy from "@/pages/Privacy";
+import Terms from "@/pages/Terms";
 import NotFound from "@/pages/NotFound";
 
 function App() {
@@ -30,6 +34,10 @@ function App() {
                         <Route path="/reset-password" element={<ResetPassword />} />
                         <Route path="/blog" element={<Blog />} />
                         <Route path="/blog/:slug" element={<BlogDetail />} />
+                        <Route path="/about" element={<About />} />
+                        <Route path="/contact" element={<Contact />} />
+                        <Route path="/privacy" element={<Privacy />} />
+                        <Route path="/terms" element={<Terms />} />
                         <Route path="/r/:slug" element={<PublicView kind="resume" />} />
                         <Route path="/c/:slug" element={<PublicView kind="cover-letter" />} />
                         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
