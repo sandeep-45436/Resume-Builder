@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /builder
+Disallow: /cover-letter
+Disallow: /cover-letters
+Disallow: /settings
+
+Sitemap: https://resume-forge-278.preview.emergentagent.com/sitemap.xml

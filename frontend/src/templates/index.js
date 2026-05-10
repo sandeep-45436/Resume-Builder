@@ -3,6 +3,8 @@ import MinimalATS from "./MinimalATS";
 import Creative from "./Creative";
 import Student from "./Student";
 import Corporate from "./Corporate";
+import Executive from "./Executive";
+import TechSleek from "./TechSleek";
 
 export const TEMPLATE_COMPONENTS = {
     "modern-professional": ModernProfessional,
@@ -10,6 +12,8 @@ export const TEMPLATE_COMPONENTS = {
     "creative": Creative,
     "student": Student,
     "corporate": Corporate,
+    "executive": Executive,
+    "tech-sleek": TechSleek,
 };
 
 export function getTemplate(id) {

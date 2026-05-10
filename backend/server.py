@@ -110,6 +110,34 @@ class AIScoreIn(BaseModel):
     resume: Dict[str, Any]
 
 
+class UpdateProfileIn(BaseModel):
+    name: str = Field(min_length=1, max_length=80)
+
+
+class ChangePasswordIn(BaseModel):
+    current_password: str
+    new_password: str = Field(min_length=6)
+
+
+class ShareToggleIn(BaseModel):
+    is_public: bool
+
+
+class CoverLetterIn(BaseModel):
+    name: str = "Untitled Cover Letter"
+    template: str = "classic-letter"
+    data: Dict[str, Any] = Field(default_factory=dict)
+
+
+class AICoverLetterIn(BaseModel):
+    role: str
+    company: str
+    job_description: Optional[str] = None
+    sender: Dict[str, Any] = Field(default_factory=dict)
+    tone: Optional[str] = "professional"
+
+
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -528,6 +556,213 @@ async def ai_score(body: AIScoreIn, user: dict = Depends(get_current_user)):
 
 
 # ---------------------------------------------------------------------------
+# Profile / Account Endpoints
+# ---------------------------------------------------------------------------
+
+@api_router.put("/auth/profile")
+async def update_profile(body: UpdateProfileIn, user: dict = Depends(get_current_user)):
+    await db.users.update_one({"id": user["id"]}, {"$set": {"name": body.name.strip()}})
+    updated = await db.users.find_one({"id": user["id"]}, {"_id": 0, "password_hash": 0})
+    return user_to_out(updated)
+
+
+@api_router.post("/auth/change-password")
+async def change_password(body: ChangePasswordIn, user: dict = Depends(get_current_user)):
+    full = await db.users.find_one({"id": user["id"]})
+    if not full or not verify_password(body.current_password, full["password_hash"]):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+    await db.users.update_one(
+        {"id": user["id"]},
+        {"$set": {"password_hash": hash_password(body.new_password)}},
+    )
+    return {"ok": True}
+
+
+@api_router.delete("/auth/account")
+async def delete_account(response: Response, user: dict = Depends(get_current_user)):
+    if user.get("role") == "admin":
+        raise HTTPException(status_code=400, detail="Cannot delete admin account")
+    await db.resumes.delete_many({"user_id": user["id"]})
+    await db.cover_letters.delete_many({"user_id": user["id"]})
+    await db.users.delete_one({"id": user["id"]})
+    clear_auth_cookies(response)
+    return {"ok": True}
+
+
+# ---------------------------------------------------------------------------
+# Resume sharing (public read links)
+# ---------------------------------------------------------------------------
+
+def _slug() -> str:
+    return secrets.token_urlsafe(8).replace("_", "").replace("-", "")[:10]
+
+
+@api_router.post("/resumes/{resume_id}/share")
+async def toggle_resume_share(resume_id: str, body: ShareToggleIn, user: dict = Depends(get_current_user)):
+    existing = await db.resumes.find_one({"id": resume_id, "user_id": user["id"]})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Resume not found")
+    update: Dict[str, Any] = {"is_public": body.is_public}
+    if body.is_public and not existing.get("public_slug"):
+        update["public_slug"] = _slug()
+    await db.resumes.update_one({"id": resume_id}, {"$set": update})
+    item = await db.resumes.find_one({"id": resume_id}, {"_id": 0})
+    return {"is_public": item.get("is_public", False), "public_slug": item.get("public_slug")}
+
+
+@api_router.get("/share/resume/{slug}")
+async def get_public_resume(slug: str):
+    item = await db.resumes.find_one({"public_slug": slug, "is_public": True}, {"_id": 0, "user_id": 0})
+    if not item:
+        raise HTTPException(status_code=404, detail="Resume not found or not public")
+    return item
+
+
+@api_router.get("/share/cover-letter/{slug}")
+async def get_public_cover_letter(slug: str):
+    item = await db.cover_letters.find_one({"public_slug": slug, "is_public": True}, {"_id": 0, "user_id": 0})
+    if not item:
+        raise HTTPException(status_code=404, detail="Cover letter not found or not public")
+    return item
+
+
+# ---------------------------------------------------------------------------
+# Cover Letters CRUD + AI
+# ---------------------------------------------------------------------------
+
+DEFAULT_COVER_LETTER = {
+    "sender": {"fullName": "", "title": "", "email": "", "phone": "", "location": "", "linkedin": ""},
+    "recipient": {"hiringManager": "", "company": "", "role": "", "address": ""},
+    "date": "",
+    "greeting": "Dear Hiring Manager,",
+    "body": [""],
+    "closing": "Sincerely,",
+}
+
+
+@api_router.get("/cover-letters")
+async def list_cover_letters(user: dict = Depends(get_current_user)):
+    items = await db.cover_letters.find({"user_id": user["id"]}, {"_id": 0}).sort("updated_at", -1).to_list(200)
+    return items
+
+
+@api_router.post("/cover-letters")
+async def create_cover_letter(body: CoverLetterIn, user: dict = Depends(get_current_user)):
+    now = datetime.now(timezone.utc).isoformat()
+    data = body.data if body.data else DEFAULT_COVER_LETTER
+    doc = {
+        "id": str(uuid.uuid4()),
+        "user_id": user["id"],
+        "name": body.name,
+        "template": body.template,
+        "data": data,
+        "is_public": False,
+        # NOTE: do NOT set public_slug to None — unique sparse index in MongoDB
+        # still indexes null values, which causes duplicate-key errors on the
+        # second insert. Field is added later by /share endpoint.
+        "created_at": now,
+        "updated_at": now,
+    }
+    await db.cover_letters.insert_one(doc)
+    doc.pop("_id", None)
+    return doc
+
+
+@api_router.get("/cover-letters/{cl_id}")
+async def get_cover_letter(cl_id: str, user: dict = Depends(get_current_user)):
+    item = await db.cover_letters.find_one({"id": cl_id, "user_id": user["id"]}, {"_id": 0})
+    if not item:
+        raise HTTPException(status_code=404, detail="Cover letter not found")
+    return item
+
+
+@api_router.put("/cover-letters/{cl_id}")
+async def update_cover_letter(cl_id: str, body: CoverLetterIn, user: dict = Depends(get_current_user)):
+    existing = await db.cover_letters.find_one({"id": cl_id, "user_id": user["id"]})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Cover letter not found")
+    update = {
+        "name": body.name,
+        "template": body.template,
+        "data": body.data,
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.cover_letters.update_one({"id": cl_id}, {"$set": update})
+    item = await db.cover_letters.find_one({"id": cl_id}, {"_id": 0})
+    return item
+
+
+@api_router.delete("/cover-letters/{cl_id}")
+async def delete_cover_letter(cl_id: str, user: dict = Depends(get_current_user)):
+    res = await db.cover_letters.delete_one({"id": cl_id, "user_id": user["id"]})
+    if res.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Cover letter not found")
+    return {"ok": True}
+
+
+@api_router.post("/cover-letters/{cl_id}/share")
+async def toggle_cover_letter_share(cl_id: str, body: ShareToggleIn, user: dict = Depends(get_current_user)):
+    existing = await db.cover_letters.find_one({"id": cl_id, "user_id": user["id"]})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Cover letter not found")
+    update: Dict[str, Any] = {"is_public": body.is_public}
+    if body.is_public and not existing.get("public_slug"):
+        update["public_slug"] = _slug()
+    await db.cover_letters.update_one({"id": cl_id}, {"$set": update})
+    item = await db.cover_letters.find_one({"id": cl_id}, {"_id": 0})
+    return {"is_public": item.get("is_public", False), "public_slug": item.get("public_slug")}
+
+
+@api_router.post("/ai/cover-letter")
+async def ai_cover_letter(body: AICoverLetterIn, user: dict = Depends(get_current_user)):
+    system = (
+        "You are an expert career writer. Generate a 3-paragraph cover letter body. "
+        "Paragraph 1: a strong opening that names the role and shows genuine interest. "
+        "Paragraph 2: 2-3 specific, measurable accomplishments tying the candidate to the role. "
+        "Paragraph 3: enthusiastic close with a clear call to action. "
+        "Return ONLY a JSON object: {\"greeting\": string, \"body\": [string, string, string], \"closing\": string}. "
+        "No markdown. Use a professional, warm tone. Avoid clichés like 'I am writing to express my interest'."
+    )
+    sender = body.sender or {}
+    sender_brief = (
+        f"Name: {sender.get('fullName','')}; Title: {sender.get('title','')}; "
+        f"Skills: {', '.join((sender.get('skills') or [])[:8])}; "
+        f"Recent role: {(sender.get('experience') or [{}])[0].get('role','')} at {(sender.get('experience') or [{}])[0].get('company','')}."
+    )
+    jd = (body.job_description or "").strip()[:2000]
+    prompt = (
+        f"Candidate profile: {sender_brief}\n"
+        f"Target role: {body.role} at {body.company}\n"
+        f"Tone: {body.tone or 'professional'}\n"
+        f"Job description (may be empty):\n{jd}\n\n"
+        "Return the JSON object only."
+    )
+    import json
+    try:
+        chat = _llm(f"cover-{user['id']}-{uuid.uuid4()}", system)
+        text = await chat.send_message(UserMessage(text=prompt))
+        raw = (text or "").strip()
+        start = raw.find("{")
+        end = raw.rfind("}")
+        if start != -1 and end != -1:
+            raw = raw[start : end + 1]
+        try:
+            parsed = json.loads(raw)
+        except Exception:
+            parsed = {
+                "greeting": "Dear Hiring Manager,",
+                "body": [raw[:600]],
+                "closing": "Sincerely,",
+            }
+        if not isinstance(parsed.get("body"), list):
+            parsed["body"] = [str(parsed.get("body", ""))]
+        return parsed
+    except Exception as e:
+        logger.exception("AI cover letter failed")
+        raise HTTPException(status_code=502, detail=f"AI generation failed: {e}")
+
+
+# ---------------------------------------------------------------------------
 # Health
 # ---------------------------------------------------------------------------
 
@@ -547,6 +782,9 @@ async def on_startup():
     await db.password_reset_tokens.create_index("expires_at", expireAfterSeconds=0)
     await db.password_reset_tokens.create_index("token", unique=True)
     await db.resumes.create_index([("user_id", 1), ("updated_at", -1)])
+    await db.resumes.create_index("public_slug", unique=True, sparse=True)
+    await db.cover_letters.create_index([("user_id", 1), ("updated_at", -1)])
+    await db.cover_letters.create_index("public_slug", unique=True, sparse=True)
 
     # Seed admin user
     admin_email = os.environ.get("ADMIN_EMAIL", "admin@resumeforge.ai").lower()

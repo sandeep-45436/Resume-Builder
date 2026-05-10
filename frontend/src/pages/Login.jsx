@@ -69,6 +69,10 @@ export default function Login() {
 
                     {error && <p className="text-sm text-red-600 mt-3" data-testid="login-error">{error}</p>}
 
+                    <div className="text-right mt-3">
+                        <Link to="/forgot-password" className="text-xs text-stone-500 hover:text-stone-900" data-testid="login-forgot-link">Forgot password?</Link>
+                    </div>
+
                     <button
                         type="submit"
                         disabled={submitting}

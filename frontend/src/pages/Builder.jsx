@@ -6,6 +6,7 @@ import { getTemplate } from "@/templates";
 import { downloadResumePDF } from "@/utils/pdfExport";
 import { Toaster, toast } from "sonner";
 import { ArrowLeft, ChevronDown, ChevronUp, Plus, Trash2, Download, Sparkles, Loader2, Save, Gauge } from "lucide-react";
+import { ShareButton } from "@/pages/CoverLetterBuilder";
 
 const SECTIONS = [
     { id: "personal", title: "Personal" },
@@ -34,6 +35,7 @@ export default function Builder() {
 
     const previewRef = useRef(null);
     const saveTimer = useRef(null);
+    const [share, setShare] = useState({ is_public: false, public_slug: null });
 
     // Load resume
     useEffect(() => {
@@ -46,6 +48,7 @@ export default function Builder() {
                 setName(r.name);
                 setTemplate(r.template);
                 setData({ ...EMPTY_RESUME, ...r.data, skills: { ...EMPTY_RESUME.skills, ...(r.data.skills || {}) } });
+                setShare({ is_public: r.is_public || false, public_slug: r.public_slug || null });
             } catch (e) {
                 toast.error(formatApiErrorDetail(e.response?.data?.detail) || "Failed to load resume");
                 navigate("/dashboard");
@@ -105,6 +108,16 @@ export default function Builder() {
         }
     };
 
+    const toggleShare = async () => {
+        try {
+            const { data: res } = await api.post(`/resumes/${id}/share`, { is_public: !share.is_public });
+            setShare(res);
+            toast.success(res.is_public ? "Public link enabled" : "Made private");
+        } catch (e) {
+            toast.error("Share toggle failed");
+        }
+    };
+
     if (!resume) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-stone-100 font-mono text-xs uppercase tracking-[0.3em] text-stone-500">
@@ -151,6 +164,7 @@ export default function Builder() {
                     >
                         {scoring ? <Loader2 size={14} className="animate-spin" /> : <Gauge size={14} />} AI Score
                     </button>
+                    <ShareButton share={share} onToggle={toggleShare} kind="resume" />
                     <button
                         onClick={handleDownload}
                         disabled={downloading}

@@ -32,13 +32,15 @@ export default function Navbar() {
                 <nav className="hidden md:flex items-center gap-8">
                     <NavLink to="/" end className={linkCls}>Home</NavLink>
                     <NavLink to="/blog" className={linkCls}>Resources</NavLink>
-                    {user && <NavLink to="/dashboard" className={linkCls} data-testid="nav-dashboard">Dashboard</NavLink>}
+                    {user && <NavLink to="/dashboard" className={linkCls} data-testid="nav-dashboard">Resumes</NavLink>}
+                    {user && <NavLink to="/cover-letters" className={linkCls} data-testid="nav-cover-letters">Letters</NavLink>}
                 </nav>
 
                 <div className="hidden md:flex items-center gap-3">
                     {user ? (
                         <>
-                            <span className="text-sm text-stone-600">Hi, {user.name?.split(" ")[0] || "there"}</span>
+                            <NavLink to="/settings" className={linkCls} data-testid="nav-settings">Settings</NavLink>
+                            <span className="text-sm text-stone-600">{user.name?.split(" ")[0] || "you"}</span>
                             <button
                                 onClick={handleLogout}
                                 className="bg-white text-stone-900 border border-stone-200 px-4 py-2 text-sm font-medium hover:bg-stone-50 transition-colors"
@@ -80,7 +82,9 @@ export default function Navbar() {
                         <Link to="/blog" onClick={() => setOpen(false)} className="py-2">Resources</Link>
                         {user ? (
                             <>
-                                <Link to="/dashboard" onClick={() => setOpen(false)} className="py-2">Dashboard</Link>
+                                <Link to="/dashboard" onClick={() => setOpen(false)} className="py-2">Resumes</Link>
+                                <Link to="/cover-letters" onClick={() => setOpen(false)} className="py-2">Cover letters</Link>
+                                <Link to="/settings" onClick={() => setOpen(false)} className="py-2">Settings</Link>
                                 <button onClick={handleLogout} className="py-2 text-left text-stone-600">Sign out</button>
                             </>
                         ) : (

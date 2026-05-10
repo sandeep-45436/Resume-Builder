@@ -1,9 +1,11 @@
 export const TEMPLATES = [
-    { id: "modern-professional", name: "Modern Professional", description: "Clean two-column layout with strong typographic hierarchy." },
-    { id: "minimal-ats", name: "Minimal ATS", description: "Single column, ATS-tested, ultra-readable." },
-    { id: "creative", name: "Creative", description: "Confident accent bar, perfect for designers and PMs." },
-    { id: "student", name: "Student", description: "Education-first layout for freshers and interns." },
-    { id: "corporate", name: "Corporate", description: "Conservative format trusted by Fortune 500 recruiters." },
+    { id: "modern-professional", name: "Modern Professional", description: "Clean two-column layout with strong typographic hierarchy.", premium: false },
+    { id: "minimal-ats", name: "Minimal ATS", description: "Single column, ATS-tested, ultra-readable.", premium: false },
+    { id: "creative", name: "Creative", description: "Confident accent bar, perfect for designers and PMs.", premium: false },
+    { id: "student", name: "Student", description: "Education-first layout for freshers and interns.", premium: false },
+    { id: "corporate", name: "Corporate", description: "Conservative format trusted by Fortune 500 recruiters.", premium: false },
+    { id: "executive", name: "Executive", description: "Bold uppercase masthead, leadership-grade composition.", premium: true },
+    { id: "tech-sleek", name: "Tech Sleek", description: "Numbered sections and mono accents for engineers.", premium: true },
 ];
 
 export const EMPTY_RESUME = {
