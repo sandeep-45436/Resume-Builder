@@ -41,6 +41,18 @@ Build a fast, modern, SEO-optimized resume builder SaaS for students, freshers, 
 - ✅ data-testid coverage on every interactive element
 - ✅ Tested: 16/16 backend pytest, 10/10 frontend Playwright flows passing
 
+## Iteration 2 (2026-02-10)
+- ✅ Forgot password page (`/forgot-password`) + Reset password page (`/reset-password?token=...`)
+- ✅ Settings page (`/settings`) — update name, change password, delete account (admin protected)
+- ✅ 2 new premium-grade resume templates (free): **Executive**, **Tech Sleek**
+- ✅ Public share links: toggle on resume / cover letter; public read endpoints `/r/{slug}` and `/c/{slug}`; auto-generated 10-char slug; copy-to-clipboard popover
+- ✅ Cover Letter Generator: list page (`/cover-letters`), full builder workspace (`/cover-letter/:id`) with sender/recipient/body sections, live preview, 2 templates (Classic, Modern), auto-save, share, PDF download
+- ✅ Quick AI modal: enter role + company + paste JD → Claude Sonnet 4.5 generates 3-paragraph draft (greeting/body/closing) and pre-fills the letter
+- ✅ Real Google AdSense wiring via `REACT_APP_ADSENSE_CLIENT_ID` env (graceful placeholder fallback)
+- ✅ `robots.txt` + `sitemap.xml` static files served from `/app/frontend/public/`
+- ✅ Bug fix: removed `public_slug: None` from cover-letter insert (was conflicting with sparse-unique index)
+- ✅ Tested: 25/25 backend pytest (incl. regression) + 13/13 new frontend flows passing
+
 ## Prioritized backlog
 ### P1 (next iteration)
 - Forgot/reset password flow UI pages (backend ready)
