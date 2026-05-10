@@ -1,0 +1,41 @@
+{
+  "summary": "Iteration 3 testing complete. Backend: 35/35 pytest cases pass (16 iter1 regression + 9 iter2 regression + 10 NEW iter3). New tests cover POST /api/ai/tailor (shape, skills_order subset of input technical skills, bullet indices valid, empty JD, no experience/projects, unauth), and forgot-password+reset-password flow with Resend stdout fallback (verified by tailing /var/log/supervisor/backend.*.log). Frontend E2E: signup -> create resume -> open Tailor modal -> generate -> apply-in-place -> re-open -> save-as-copy -> navigate to NEW resume builder. All 9 test steps PASS. AI tailor takes ~5-10s; auto-save toast appears on apply.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration3.py",
+    "/app/backend/tests/test_iteration2.py",
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/iter3_results.xml"
+  ],
+  "action_items": [
+    "OPTIONAL hardening (not blocking): server-side filter ai_tailor output. Currently the LLM is *prompted* to (a) keep skills_order as a subset of resume.skills.technical and (b) emit valid bullet item_index/bullet_index, but the server does not enforce this. If the model misbehaves, malformed entries could leak through. Recommend a post-parse filter: drop bullets whose section/item_index/bullet_index are out of range, and drop skills not present in the input set. Tests pass today because Claude Sonnet 4.5 honors the constraints, but defensive validation would make this future-proof."
+  ],
+  "critical_code_review_comments": [
+    "server.py /ai/tailor (line 820): output is not validated against the input resume. The prompt requests skills_order ⊂ resume.skills.technical and valid bullet indices, but no server-side enforcement exists. Suggest filtering parsed['skills_order'] to those present in the input set, and parsed['bullets'] to those with valid section/item_index/bullet_index ranges. Today Claude Sonnet 4.5 complies, but a regression in model behavior would silently bypass the contract.",
+    "server.py forgot_password (line 347): user-existence check + email-stub log line ('[email-stub] Password reset for <email>: <link>') happens only when user is found. The 200 response message is identical for unknown emails — good (no enumeration). The log itself, however, distinguishes users (no log = not found). This is fine as it's server-internal, just worth being aware that ops staff with log access can enumerate.",
+    "TailorModal.jsx: 'Save as new copy' name format is `${name} — ${company}` (em dash), but when company is empty, it falls back to `${name} — Tailored`. Verified in E2E with toast 'Saved as Untitled Resume — Tailored'. Behavior is reasonable; just document.",
+    "Tailor button is gated on lg: breakpoint (hidden < 1024px). Mobile users cannot access the AI tailor. Consider exposing it via the secondary menu on smaller viewports.",
+    "RESEND integration imports `resend` synchronously but invokes via `asyncio.to_thread` — good. resend.api_key is set as a module global on each call which is not thread-safe under concurrent load (rare in this app, but worth noting if usage scales)."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration3.py (NEW — 10 pytest cases)"
+  ],
+  "success_rate": {
+    "backend": "100% (35/35 incl. iter1+iter2 regression)",
+    "frontend": "100% (9/9 E2E steps for iter3 new flow)"
+  },
+  "test_credentials": "Admin: admin@resumeforge.ai / Admin@12345 (seeded). Iter3 ephemeral users created with pattern TEST_*_<uuid8>@resumeforge.ai (pytest) and e2e_iter3*_<ts>@example.com (Playwright).",
+  "seed_data_creation": "Pytest creates ~5 ephemeral TEST_* users (forgot, reset, tailor, etc.) and disposes via assertions (no explicit cleanup; password_reset_tokens TTL drops in 1h). Frontend E2E creates 1 e2e_* user + 2 resumes (orig + tailored copy) — no auto-cleanup.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Iter3 tests live in /app/backend/tests/test_iteration3.py — extend rather than rewrite. Helper _tail_backend_log() reads /var/log/supervisor/backend.{err,out}.log to assert stdout email-stub line. AI tailor endpoint takes ~5-10s, timeout used is 90s. Sample resume in tests has experience+projects+skills.technical=[Python, FastAPI, PostgreSQL, Docker, Kubernetes, Redis] — useful for regression. Empty-JD case still calls LLM but the post-parse defaults guarantee a valid object back. Frontend testids: workspace-tailor-button (hidden < lg), tailor-modal, tailor-jd, tailor-generate, tailor-keywords, tailor-skills-order, tailor-bullet-{i}, tailor-accept-{i}, tailor-apply, tailor-save-copy, tailor-close. The lg: gating means use viewport >=1280 (we used 1920x1080).",
+  "rca of the issue": "No bugs found in iteration 3 backend or frontend. All requested behaviors verified working: (1) ai/tailor returns the documented shape and Claude honors skills_order ⊂ input.technical and valid bullet indices on this run, (2) forgot-password with empty RESEND_API_KEY logs '[email-stub] Password reset for <email>: <link>' to backend logs and returns 200 with neutral message, (3) unknown email also returns 200 with same message and does NOT log a stub line (no enumeration), (4) end-to-end forgot->grep token->reset->login-with-new->old-fails->token-reuse-fails all work, (5) Tailor button -> modal -> generate -> apply-in-place keeps user on same /builder/{id} (auto-save fires), (6) save-as-copy POSTs a new resume and navigates to the new /builder/{newId}."
+}

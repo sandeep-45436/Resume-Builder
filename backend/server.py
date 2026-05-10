@@ -13,6 +13,8 @@ from typing import List, Optional, Dict, Any
 
 import bcrypt
 import jwt
+import asyncio
+import resend
 from fastapi import FastAPI, APIRouter, HTTPException, Request, Response, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -135,6 +137,13 @@ class AICoverLetterIn(BaseModel):
     job_description: Optional[str] = None
     sender: Dict[str, Any] = Field(default_factory=dict)
     tone: Optional[str] = "professional"
+
+
+class AITailorIn(BaseModel):
+    resume: Dict[str, Any]
+    job_description: str
+    role: Optional[str] = None
+    company: Optional[str] = None
 
 
 
@@ -349,9 +358,50 @@ async def forgot_password(body: ForgotPasswordIn):
             "expires_at": datetime.now(timezone.utc) + timedelta(hours=1),
         })
         frontend = os.environ.get("FRONTEND_URL", "http://localhost:3000")
-        logger.info(f"Password reset link: {frontend}/reset-password?token={token}")
+        link = f"{frontend}/reset-password?token={token}"
+        await send_password_reset_email(email, user.get("name") or "there", link)
     # Same response either way to prevent enumeration
     return {"ok": True, "message": "If the email exists, a reset link has been sent."}
+
+
+async def send_password_reset_email(to_email: str, name: str, link: str) -> None:
+    api_key = os.environ.get("RESEND_API_KEY", "").strip()
+    if not api_key:
+        logger.info(f"[email-stub] Password reset for {to_email}: {link}")
+        return
+    sender = os.environ.get("SENDER_EMAIL", "onboarding@resend.dev")
+    subject = "Reset your ResumeForge AI password"
+    text = (
+        f"Hi {name},\n\n"
+        f"Use the link below to reset your ResumeForge AI password. "
+        f"It expires in 1 hour.\n\n{link}\n\n"
+        "If you did not request this, you can safely ignore this email."
+    )
+    html = f"""
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#fafaf9;padding:32px 0;font-family:'IBM Plex Sans',-apple-system,Helvetica,Arial,sans-serif;color:#0c0a09;">
+      <tr><td align="center">
+        <table width="520" cellpadding="0" cellspacing="0" style="background:#fff;border:1px solid #e7e5e4;padding:32px;">
+          <tr><td>
+            <div style="font-family:'Fraunces',Georgia,serif;font-size:22px;font-weight:700;color:#0c0a09;">ResumeForge <span style="color:#d97706;font-size:11px;letter-spacing:0.2em;">AI</span></div>
+            <h1 style="font-family:'Fraunces',Georgia,serif;font-size:28px;line-height:1.15;margin:24px 0 8px;">Reset your password</h1>
+            <p style="color:#44403c;font-size:14px;line-height:1.6;margin:0 0 24px;">Hi {name}, click the button below to set a new password. This link expires in 1 hour.</p>
+            <a href="{link}" style="display:inline-block;background:#002FA7;color:#fff;text-decoration:none;padding:12px 22px;font-weight:600;font-size:14px;">Reset password &rarr;</a>
+            <p style="color:#78716c;font-size:12px;line-height:1.6;margin:28px 0 0;">If the button doesn't work, paste this URL into your browser:<br><span style="color:#002FA7;word-break:break-all;">{link}</span></p>
+            <p style="color:#a8a29e;font-size:12px;margin:28px 0 0;border-top:1px solid #e7e5e4;padding-top:16px;">If you didn't request this, ignore this email &mdash; your password won't change.</p>
+          </td></tr>
+        </table>
+      </td></tr>
+    </table>
+    """
+    try:
+        resend.api_key = api_key
+        await asyncio.to_thread(
+            resend.Emails.send,
+            {"from": sender, "to": [to_email], "subject": subject, "html": html, "text": text},
+        )
+        logger.info(f"Password reset email sent to {to_email}")
+    except Exception as e:
+        logger.exception(f"Resend send failed for {to_email}: {e}")
 
 
 @api_router.post("/auth/reset-password")
@@ -762,6 +812,63 @@ async def ai_cover_letter(body: AICoverLetterIn, user: dict = Depends(get_curren
         raise HTTPException(status_code=502, detail=f"AI generation failed: {e}")
 
 
+
+# ---------------------------------------------------------------------------
+# AI Job Tailor
+# ---------------------------------------------------------------------------
+
+@api_router.post("/ai/tailor")
+async def ai_tailor(body: AITailorIn, user: dict = Depends(get_current_user)):
+    import json
+    system = (
+        "You are an expert resume tailor. Given a resume JSON and a job description, "
+        "tailor the resume to better match the JD WITHOUT fabricating new experience. "
+        "Return ONLY a JSON object with these keys:\n"
+        "  match_score: integer 0-100 (how well the original resume matches the JD)\n"
+        "  keywords_added: array of strings (key JD nouns/phrases the candidate should emphasise)\n"
+        "  skills_order: array of strings — the candidate's existing technical skills re-ordered "
+        "with the most JD-relevant first; only include skills already present in resume.skills.technical\n"
+        "  bullets: array of up to 3 objects, each {\n"
+        "    section: 'experience' | 'projects',\n"
+        "    item_index: integer (0-based index into resume.experience or resume.projects),\n"
+        "    bullet_index: integer (0-based index into that item's bullets),\n"
+        "    original: string (the original bullet text),\n"
+        "    suggested: string (a stronger, JD-aligned rewrite, 1 sentence, action verb led, measurable, ATS-friendly, <30 words)\n"
+        "  }\n"
+        "Pick bullets that have the most upside for matching the JD. Do NOT invent metrics or roles. "
+        "Output the JSON object only — no markdown, no commentary."
+    )
+    resume_json = json.dumps(body.resume)[:8000]
+    jd = (body.job_description or "").strip()[:4000]
+    extra = ""
+    if body.role or body.company:
+        extra = f"Target: {body.role or ''} at {body.company or ''}.\n"
+    prompt = f"{extra}Job description:\n{jd}\n\nResume:\n{resume_json}\n\nReturn the JSON object."
+    try:
+        chat = _llm(f"tailor-{user['id']}-{uuid.uuid4()}", system)
+        text = await chat.send_message(UserMessage(text=prompt))
+        raw = (text or "").strip()
+        start = raw.find("{")
+        end = raw.rfind("}")
+        if start != -1 and end != -1:
+            raw = raw[start : end + 1]
+        try:
+            parsed = json.loads(raw)
+        except Exception:
+            logger.warning("ai_tailor: JSON parse failed")
+            parsed = {"match_score": 0, "keywords_added": [], "skills_order": [], "bullets": []}
+        parsed.setdefault("match_score", 0)
+        parsed.setdefault("keywords_added", [])
+        parsed.setdefault("skills_order", [])
+        parsed.setdefault("bullets", [])
+        if not isinstance(parsed["bullets"], list):
+            parsed["bullets"] = []
+        return parsed
+    except Exception as e:
+        logger.exception("AI tailor failed")
+        raise HTTPException(status_code=502, detail=f"AI generation failed: {e}")
+
+
 # ---------------------------------------------------------------------------
 # Health
 # ---------------------------------------------------------------------------
@@ -824,3 +931,4 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+

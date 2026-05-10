@@ -5,8 +5,9 @@ import { TEMPLATES, computeCompletion, EMPTY_RESUME, uid } from "@/utils/resumeD
 import { getTemplate } from "@/templates";
 import { downloadResumePDF } from "@/utils/pdfExport";
 import { Toaster, toast } from "sonner";
-import { ArrowLeft, ChevronDown, ChevronUp, Plus, Trash2, Download, Sparkles, Loader2, Save, Gauge } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronUp, Plus, Trash2, Download, Sparkles, Loader2, Save, Gauge, Wand2 } from "lucide-react";
 import { ShareButton } from "@/pages/CoverLetterBuilder";
+import TailorModal from "@/components/TailorModal";
 
 const SECTIONS = [
     { id: "personal", title: "Personal" },
@@ -36,6 +37,7 @@ export default function Builder() {
     const previewRef = useRef(null);
     const saveTimer = useRef(null);
     const [share, setShare] = useState({ is_public: false, public_slug: null });
+    const [tailorOpen, setTailorOpen] = useState(false);
 
     // Load resume
     useEffect(() => {
@@ -157,6 +159,13 @@ export default function Builder() {
                         ))}
                     </select>
                     <button
+                        onClick={() => setTailorOpen(true)}
+                        className="hidden lg:inline-flex items-center gap-2 bg-amber-500 text-stone-950 px-3 py-2 text-sm font-medium hover:bg-amber-400"
+                        data-testid="workspace-tailor-button"
+                    >
+                        <Wand2 size={14} /> Tailor to JD
+                    </button>
+                    <button
                         onClick={runScore}
                         disabled={scoring}
                         className="hidden md:inline-flex items-center gap-2 bg-amber-50 text-amber-900 border border-amber-200 px-3 py-2 text-sm hover:bg-amber-100 disabled:opacity-60"
@@ -223,6 +232,21 @@ export default function Builder() {
                     </div>
                 </section>
             </div>
+
+            <TailorModal
+                open={tailorOpen}
+                onClose={() => setTailorOpen(false)}
+                resume={{ ...data, _template: template }}
+                resumeId={id}
+                resumeName={name}
+                onApplyInPlace={(tailored) => {
+                    const { _template, ...clean } = tailored;
+                    setData(clean);
+                }}
+                onSavedAsCopy={(newDoc) => {
+                    navigate(`/builder/${newDoc.id}`);
+                }}
+            />
         </div>
     );
 }
