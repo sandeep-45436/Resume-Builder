@@ -863,6 +863,46 @@ async def ai_tailor(body: AITailorIn, user: dict = Depends(get_current_user)):
         parsed.setdefault("bullets", [])
         if not isinstance(parsed["bullets"], list):
             parsed["bullets"] = []
+
+        # Defensive validation: filter AI output against actual resume shape
+        input_skills = body.resume.get("skills", {}).get("technical", []) or []
+        input_skills_lower = {s.lower(): s for s in input_skills if isinstance(s, str)}
+        parsed["skills_order"] = [
+            input_skills_lower[s.lower()]
+            for s in (parsed.get("skills_order") or [])
+            if isinstance(s, str) and s.lower() in input_skills_lower
+        ]
+
+        valid_bullets = []
+        for b in parsed["bullets"]:
+            if not isinstance(b, dict):
+                continue
+            section = b.get("section")
+            if section not in ("experience", "projects"):
+                continue
+            items = body.resume.get(section) or []
+            ii, bi = b.get("item_index"), b.get("bullet_index")
+            if not isinstance(ii, int) or ii < 0 or ii >= len(items):
+                continue
+            item_bullets = (items[ii] or {}).get("bullets") or []
+            if not isinstance(bi, int) or bi < 0 or bi >= len(item_bullets):
+                continue
+            if not isinstance(b.get("suggested"), str) or not b["suggested"].strip():
+                continue
+            valid_bullets.append({
+                "section": section,
+                "item_index": ii,
+                "bullet_index": bi,
+                "original": str(b.get("original") or item_bullets[bi]),
+                "suggested": b["suggested"].strip(),
+            })
+        parsed["bullets"] = valid_bullets[:3]
+
+        try:
+            parsed["match_score"] = max(0, min(100, int(parsed.get("match_score", 0))))
+        except Exception:
+            parsed["match_score"] = 0
+
         return parsed
     except Exception as e:
         logger.exception("AI tailor failed")

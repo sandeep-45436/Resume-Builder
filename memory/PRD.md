@@ -53,6 +53,13 @@ Build a fast, modern, SEO-optimized resume builder SaaS for students, freshers, 
 - ✅ Bug fix: removed `public_slug: None` from cover-letter insert (was conflicting with sparse-unique index)
 - ✅ Tested: 25/25 backend pytest (incl. regression) + 13/13 new frontend flows passing
 
+## Iteration 3 (2026-02-10)
+- ✅ **AI Job-Tailor**: `POST /api/ai/tailor` — paste JD, AI returns match score, JD keywords, re-ordered skills (filtered to subset of existing skills server-side), and up to 3 bullet rewrites (with validated indices). Frontend modal in Builder workspace with two action paths: "Apply to this resume" (in-place edit + auto-save) or "Save as new copy" (creates `{name} — {company}` resume and navigates).
+- ✅ Defensive server-side validation of AI tailor output (filters skills not in input, validates bullet section/item_index/bullet_index ranges, clamps match_score 0–100).
+- ✅ **Email delivery (Resend)** for password reset: HTML + text email with 1-hr token; gracefully falls back to stdout `[email-stub]` log when `RESEND_API_KEY` is empty.
+- ✅ Tailor button visible on all viewports (was lg:-only).
+- ✅ Tested: 35/35 backend pytest (incl. all regression) + 9/9 new frontend flows passing.
+
 ## Prioritized backlog
 ### P1 (next iteration)
 - Forgot/reset password flow UI pages (backend ready)

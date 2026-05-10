@@ -160,10 +160,10 @@ export default function Builder() {
                     </select>
                     <button
                         onClick={() => setTailorOpen(true)}
-                        className="hidden lg:inline-flex items-center gap-2 bg-amber-500 text-stone-950 px-3 py-2 text-sm font-medium hover:bg-amber-400"
+                        className="inline-flex items-center gap-2 bg-amber-500 text-stone-950 px-3 py-2 text-sm font-medium hover:bg-amber-400"
                         data-testid="workspace-tailor-button"
                     >
-                        <Wand2 size={14} /> Tailor to JD
+                        <Wand2 size={14} /> <span className="hidden sm:inline">Tailor to JD</span>
                     </button>
                     <button
                         onClick={runScore}
