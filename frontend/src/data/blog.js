@@ -1,0 +1,75 @@
+export const BLOG_POSTS = [
+    {
+        slug: "resume-tips-for-freshers",
+        title: "10 Resume Tips Every Fresher Should Know in 2026",
+        excerpt: "From your headline to your project section — what actually moves the needle when recruiters scan your fresher resume.",
+        readMins: 6,
+        category: "Freshers",
+        cover: "https://images.unsplash.com/photo-1760712491426-ef0e797b8c52?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njd8MHwxfHNlYXJjaHwxfHxtaW5pbWFsaXN0JTIwcHJvZmVzc2lvbmFsJTIwZGVzayUyMHNldHVwfGVufDB8fHx8MTc3ODQwMDIyN3ww&ixlib=rb-4.1.0&q=85",
+        sections: [
+            { h: "1. Lead with a sharp headline", p: "Most freshers use job titles like “Aspiring Software Engineer.” Replace it with what you actually do today: “CS final-year student building React apps and shipping side projects.” It’s specific, honest, and grabs attention." },
+            { h: "2. Quantify everything you can", p: "Numbers force clarity. “Built a chat app” becomes “Built a real-time chat app used by 60 classmates with 99% uptime over 3 months.” If you don’t have numbers, write the impact: who used it, what changed." },
+            { h: "3. Projects > coursework", p: "Recruiters skim. Two strong, hosted projects beat ten course names. Each project entry needs: a one-line description, the stack, the link, and 1–2 outcome bullets." },
+            { h: "4. Use the right keywords", p: "Read three real job descriptions for roles you want. Pull the recurring nouns (React, REST APIs, SQL, agile). Mirror them where truthful — that’s what ATS scans look for." },
+            { h: "5. Keep it to one page", p: "If you’re a fresher, you have one page. Prioritise. If something doesn’t earn its space, cut it." },
+            { h: "6. Skip the photo and DOB", p: "Most modern resumes (especially in tech) drop photos, gender, marital status, and date of birth. Save space for your work." },
+            { h: "7. Use action verbs", p: "Built. Shipped. Designed. Scaled. Improved. Avoid “Responsible for” — it never communicates outcome." },
+            { h: "8. Tailor for each application", p: "Make a base resume. Then for each role, swap 3–4 bullets to match the job description’s language. ATS will love you for it." },
+            { h: "9. Triple-check formatting", p: "Save as PDF unless the application asks for DOCX. Open the PDF on your phone. If it’s readable there, it will survive any ATS." },
+            { h: "10. Add a real link", p: "GitHub, portfolio, LinkedIn, deployed app — at least one place where someone can verify what you wrote. Empty links are worse than no links." },
+        ],
+    },
+    {
+        slug: "ats-guide-2026",
+        title: "The Plain-English ATS Guide (2026)",
+        excerpt: "What an Applicant Tracking System actually is, what it scans for, and the 5 formatting choices that quietly tank your resume.",
+        readMins: 8,
+        category: "ATS",
+        cover: "https://images.unsplash.com/photo-1760597371592-09e901b7317d?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njd8MHwxfHNlYXJjaHwzfHxtaW5pbWFsaXN0JTIwcHJvZmVzc2lvbmFsJTIwZGVzayUyMHNldHVwfGVufDB8fHx8MTc3ODQwMDIyN3ww&ixlib=rb-4.1.0&q=85",
+        sections: [
+            { h: "What an ATS does, exactly", p: "An ATS parses your PDF/DOCX into structured fields: name, contact, work history, education, skills. Then it ranks the candidate against the job description using keyword and recency signals. It doesn’t hate creativity — it hates ambiguity." },
+            { h: "Use a clean, single-column layout when in doubt", p: "Two-column layouts work in most modern parsers — but if you’re applying to a Fortune 500 with an old Taleo or iCIMS deployment, a single column is the safest bet." },
+            { h: "Avoid headers, footers, and text boxes", p: "Many parsers ignore content inside headers/footers. Put your name, email, and phone in the body of the document." },
+            { h: "Use real bullets, not dashes or emoji", p: "•, —, and ▸ render reliably. Emoji and decorative glyphs sometimes don’t. Stick to ASCII." },
+            { h: "Use the exact job-description keywords", p: "If the JD says “REST APIs”, write “REST APIs” — not “REST endpoints.” Match the noun." },
+            { h: "Don’t embed your contact info as an image", p: "Some designers do this. ATS can’t read images. Always have your email and phone as selectable text." },
+        ],
+    },
+    {
+        slug: "common-resume-mistakes",
+        title: "7 Resume Mistakes That Quietly Cost You Interviews",
+        excerpt: "The bad habits we see on 80% of submissions — and the simple fixes.",
+        readMins: 5,
+        category: "Tips",
+        cover: "https://images.unsplash.com/photo-1760712491426-ef0e797b8c52?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njd8MHwxfHNlYXJjaHwxfHxtaW5pbWFsaXN0JTIwcHJvZmVzc2lvbmFsJTIwZGVzayUyMHNldHVwfGVufDB8fHx8MTc3ODQwMDIyN3ww&ixlib=rb-4.1.0&q=85",
+        sections: [
+            { h: "1. The vague summary", p: "“Hardworking individual seeking growth” tells a recruiter nothing. Replace with role + outcome + scope, e.g., “Backend engineer scaling Python services from 10k to 1M req/day.”" },
+            { h: "2. Listing duties instead of impact", p: "Don’t describe your job description. Describe what changed because you were there." },
+            { h: "3. Buzzword soup", p: "“Synergy”, “go-getter”, “results-driven” — all dead on contact. Use specific, measurable verbs." },
+            { h: "4. Inconsistent date formats", p: "Pick one: “Jan 2023 — Mar 2024” or “01/2023 — 03/2024”. Mixing them makes a recruiter wince." },
+            { h: "5. Walls of text", p: "Bullets > paragraphs. Five bullets max per role." },
+            { h: "6. Skills section dumps", p: "Listing every framework you’ve ever read about looks unserious. Pick 8–12 you can actually defend in an interview." },
+            { h: "7. No links", p: "Add at least one — LinkedIn, GitHub, portfolio. Verifiability beats claims." },
+        ],
+    },
+    {
+        slug: "interview-prep",
+        title: "How to Prep for Your First Interview (After the Resume Lands It)",
+        excerpt: "A 7-day plan that combines technical, behavioral, and the company-research part most candidates skip.",
+        readMins: 7,
+        category: "Interview",
+        cover: "https://images.unsplash.com/photo-1760597371592-09e901b7317d?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njd8MHwxfHNlYXJjaHwzfHxtaW5pbWFsaXN0JTIwcHJvZmVzc2lvbmFsJTIwZGVzayUyMHNldHVwfGVufDB8fHx8MTc3ODQwMDIyN3ww&ixlib=rb-4.1.0&q=85",
+        sections: [
+            { h: "Day 1 — Re-read your own resume", p: "Reviewers will ask about anything on it. If you can’t talk about it for 90 seconds, cut it." },
+            { h: "Day 2 — Research the company", p: "Read their last 3 blog posts, last quarter’s news, and one customer review. Bring one specific question into the interview." },
+            { h: "Day 3 — Behavioral STAR stories", p: "Prep 5 stories using Situation, Task, Action, Result. Each story should map to multiple behavioral prompts." },
+            { h: "Day 4–5 — Role-specific drills", p: "If engineering, do 2 LeetCode-medium problems per day and one system-design walk-through. If non-engineering, write a 1-page “mock plan” for a real challenge the company faces." },
+            { h: "Day 6 — Mock interview", p: "Loop in a friend or use a recording. The first 30 seconds of speaking out loud is where most people freeze. Practice it." },
+            { h: "Day 7 — Logistics", p: "Test your camera, mic, internet, lighting. Have water. Have a printed copy of your resume. Sleep early." },
+        ],
+    },
+];
+
+export function getPostBySlug(slug) {
+    return BLOG_POSTS.find((p) => p.slug === slug);
+}
