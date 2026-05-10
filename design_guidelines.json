@@ -1,0 +1,132 @@
+{
+  "theme": "Light",
+  "archetype": "Archetype 4 (Swiss & High-Contrast)",
+  "concept": "Editorial & Professional Craft Tool (Linear/Notion-grade polish)",
+  "typography": {
+    "heading_font": "Cabinet Grotesk",
+    "body_font": "IBM Plex Sans",
+    "mono_font": "IBM Plex Mono",
+    "scales": {
+      "h1": "text-4xl sm:text-5xl lg:text-6xl tracking-tighter leading-none font-bold",
+      "h2": "text-2xl sm:text-3xl lg:text-4xl tracking-tight leading-tight font-semibold",
+      "h3": "text-xl sm:text-2xl tracking-tight font-medium",
+      "h4": "text-lg sm:text-xl font-medium",
+      "body": "text-base leading-relaxed",
+      "small": "text-sm",
+      "overline": "text-xs tracking-[0.2em] uppercase font-bold"
+    }
+  },
+  "colors": {
+    "background": {
+      "primary": "bg-stone-50",
+      "secondary": "bg-white",
+      "canvas": "bg-stone-100",
+      "dark_inverse": "bg-stone-950"
+    },
+    "text": {
+      "primary": "text-stone-900",
+      "secondary": "text-stone-500",
+      "inverse": "text-white"
+    },
+    "brand": {
+      "primary": "bg-[#002FA7]",
+      "primary_hover": "bg-[#00227a]",
+      "accent_ai": "bg-amber-500",
+      "accent_ai_hover": "bg-amber-600"
+    },
+    "border": {
+      "subtle": "border-stone-200",
+      "strong": "border-stone-300",
+      "focus": "border-[#002FA7]"
+    }
+  },
+  "layout_and_spacing": {
+    "generous_spacing": true,
+    "scale": ["p-4", "p-8", "p-12", "p-24"],
+    "grids": {
+      "dashboard": "grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6",
+      "marketing_bento": "grid-cols-1 md:grid-cols-12 gap-8",
+      "footer": "grid-cols-1 md:grid-cols-4 gap-12 py-24"
+    },
+    "workspace_split": {
+      "container": "flex h-screen w-full overflow-hidden bg-white",
+      "left_panel": "w-full md:w-1/3 h-full overflow-y-auto border-r border-stone-200 p-6",
+      "right_preview": "hidden md:flex md:w-2/3 h-full bg-stone-100 items-center justify-center p-8 overflow-y-auto"
+    }
+  },
+  "components": {
+    "borders_and_shadows": {
+      "radius": "rounded-none",
+      "shadow": "shadow-sm",
+      "glass": "backdrop-blur-xl bg-white/80 border-b border-stone-200"
+    },
+    "buttons": {
+      "primary": "bg-[#002FA7] text-white rounded-none px-6 py-3 font-medium hover:bg-[#00227a] transition-colors focus:ring-2 focus:ring-[#002FA7] focus:ring-offset-2",
+      "secondary": "bg-white text-stone-900 border border-stone-200 rounded-none px-6 py-3 font-medium hover:bg-stone-50 transition-colors",
+      "ai_action": "bg-amber-50 text-amber-900 border border-amber-200 rounded-none px-4 py-2 hover:bg-amber-100 transition-colors flex items-center gap-2"
+    },
+    "inputs": "rounded-none border-stone-200 focus:ring-2 focus:ring-[#002FA7] focus:border-transparent bg-white w-full",
+    "cards": "bg-white border border-stone-200 rounded-none p-6 transition-all hover:shadow-md hover:border-stone-300",
+    "accordion": "border-b border-stone-200 rounded-none"
+  },
+  "media_and_images": [
+    {
+      "category": "hero_visual",
+      "description": "Abstract Swiss poster design for the main landing page hero section",
+      "url": "https://static.prod-images.emergentagent.com/jobs/f9f1eb10-7f37-4ade-9035-ceaa090ba3ff/images/04e50065df510db46a26b1f53fd20d288535588969919068fe86b5e9f2fd92b5.png"
+    },
+    {
+      "category": "feature_resume_preview",
+      "description": "Floating blank document representing the builder workspace",
+      "url": "https://static.prod-images.emergentagent.com/jobs/f9f1eb10-7f37-4ade-9035-ceaa090ba3ff/images/d976c3ca4c1644c78aa300e36d89d4ef3cb17c2600d9626d7f9ec7af60225e48.png"
+    },
+    {
+      "category": "testimonial_avatar_1",
+      "description": "Professional headshot for user testimonial",
+      "url": "https://images.unsplash.com/photo-1762522926157-bcc04bf0b10a?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODF8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBoZWFkc2hvdCUyMHBvcnRyYWl0fGVufDB8fHx8MTc3ODI1ODA4M3ww&ixlib=rb-4.1.0&q=85"
+    },
+    {
+      "category": "testimonial_avatar_2",
+      "description": "Professional headshot for user testimonial",
+      "url": "https://images.unsplash.com/photo-1655249493799-9cee4fe983bb?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODF8MHwxfHNlYXJjaHwzfHxwcm9mZXNzaW9uYWwlMjBoZWFkc2hvdCUyMHBvcnRyYWl0fGVufDB8fHx8MTc3ODI1ODA4M3ww&ixlib=rb-4.1.0&q=85"
+    },
+    {
+      "category": "testimonial_avatar_3",
+      "description": "Professional headshot for user testimonial",
+      "url": "https://images.unsplash.com/photo-1769636929388-99eff95d3bf1?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODF8MHwxfHNlYXJjaHwyfHxwcm9mZXNzaW9uYWwlMjBoZWFkc2hvdCUyMHBvcnRyYWl0fGVufDB8fHx8MTc3ODI1ODA4M3ww&ixlib=rb-4.1.0&q=85"
+    },
+    {
+      "category": "blog_thumbnail_1",
+      "description": "Minimalist desk setup for blog post",
+      "url": "https://images.unsplash.com/photo-1760712491426-ef0e797b8c52?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njd8MHwxfHNlYXJjaHwxfHxtaW5pbWFsaXN0JTIwcHJvZmVzc2lvbmFsJTIwZGVzayUyMHNldHVwfGVufDB8fHx8MTc3ODQwMDIyN3ww&ixlib=rb-4.1.0&q=85"
+    },
+    {
+      "category": "blog_thumbnail_2",
+      "description": "Silver smartphone and laptop on desk for ATS guide",
+      "url": "https://images.unsplash.com/photo-1760597371592-09e901b7317d?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njd8MHwxfHNlYXJjaHwzfHxtaW5pbWFsaXN0JTIwcHJvZmVzc2lvbmFsJTIwZGVzayUyMHNldHVwfGVufDB8fHx8MTc3ODQwMDIyN3ww&ixlib=rb-4.1.0&q=85"
+    }
+  ],
+  "testing_conventions": {
+    "data_testid_format": "kebab-case, role-based",
+    "examples": [
+      "marketing-hero-cta",
+      "auth-login-button",
+      "dashboard-create-resume-button",
+      "workspace-template-switcher",
+      "workspace-ai-assist-button",
+      "workspace-pdf-download",
+      "form-section-accordion",
+      "resume-preview-document"
+    ]
+  },
+  "instructions_to_main_agent": [
+    "CRITICAL: Do not use purple, violet, or teal anywhere. Use International Klein Blue (#002FA7) as the brand primary and Amber for AI-related actions.",
+    "CRITICAL: Use Cabinet Grotesk for headings and IBM Plex Sans for body. Do not default to Inter or Roboto.",
+    "For the marketing pages, prioritize pure HTML/Tailwind to allow structural overlap and bento grids without strict constraints.",
+    "For the dashboard and builder app, utilize heavily customized Shadcn components (strip out heavy border radii to match the 'rounded-none' brutalist/editorial aesthetic).",
+    "Workspace Builder Layout: Left side contains the accordion/forms. Right side contains the live preview. Ensure the preview panel is visually distinct (a darker canvas behind a white A4 paper representation).",
+    "AdSense / Affiliates: Design specific 'Card' components for AdSense placeholders and affiliate links that blend into the Swiss grid, ensuring they do not disrupt the professional UX.",
+    "The 5 templates (Modern Professional, Minimal ATS, Creative, Student, Corporate) should have distinct layout CSS but draw from the same clean typographic scales.",
+    "Use Phosphor Icons or Lucide React with sharp, thin stroke weights to match the typographic feel."
+  ]
+}
