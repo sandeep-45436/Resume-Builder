@@ -20,6 +20,7 @@ export default function Footer() {
                     <div className="text-xs uppercase tracking-[0.2em] font-bold text-stone-900 mb-4">Product</div>
                     <ul className="space-y-2 text-sm text-stone-600">
                         <li><Link to="/" className="hover:text-stone-900">Builder</Link></li>
+                        <li><Link to="/demo" className="hover:text-stone-900" data-testid="footer-demo">Demo</Link></li>
                         <li><Link to="/dashboard" className="hover:text-stone-900">My resumes</Link></li>
                         <li><Link to="/cover-letters" className="hover:text-stone-900">Cover letters</Link></li>
                         <li><Link to="/signup" className="hover:text-stone-900">Sign up</Link></li>

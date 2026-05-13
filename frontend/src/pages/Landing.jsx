@@ -33,8 +33,9 @@ export default function Landing() {
                         <Link to="/signup" className="bg-[#002FA7] text-white px-6 py-3 font-medium hover:bg-[#00227a] transition-colors inline-flex items-center gap-2" data-testid="hero-cta-signup">
                             Start building free <ArrowRight size={16} />
                         </Link>
-                        <Link to="/blog" className="bg-white text-stone-900 border border-stone-200 px-6 py-3 font-medium hover:bg-stone-100 transition-colors" data-testid="hero-cta-resources">
-                            Read resume tips
+                        <Link to="/demo" className="bg-white text-stone-900 border border-stone-200 px-6 py-3 font-medium hover:bg-stone-100 transition-colors inline-flex items-center gap-2" data-testid="hero-cta-demo">
+                            <span className="inline-block w-0 h-0 border-y-[5px] border-y-transparent border-l-[8px] border-l-stone-900" />
+                            Watch 50-second demo
                         </Link>
                     </div>
                     <div className="mt-10 flex flex-wrap gap-x-8 gap-y-3 text-sm text-stone-600">

@@ -19,6 +19,7 @@ import About from "@/pages/About";
 import Contact from "@/pages/Contact";
 import Privacy from "@/pages/Privacy";
 import Terms from "@/pages/Terms";
+import Demo from "@/pages/Demo";
 import NotFound from "@/pages/NotFound";
 
 function App() {
@@ -38,6 +39,7 @@ function App() {
                         <Route path="/contact" element={<Contact />} />
                         <Route path="/privacy" element={<Privacy />} />
                         <Route path="/terms" element={<Terms />} />
+                        <Route path="/demo" element={<Demo />} />
                         <Route path="/r/:slug" element={<PublicView kind="resume" />} />
                         <Route path="/c/:slug" element={<PublicView kind="cover-letter" />} />
                         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
