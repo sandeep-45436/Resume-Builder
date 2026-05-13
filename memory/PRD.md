@@ -60,6 +60,18 @@ Build a fast, modern, SEO-optimized resume builder SaaS for students, freshers, 
 - ✅ Tailor button visible on all viewports (was lg:-only).
 - ✅ Tested: 35/35 backend pytest (incl. all regression) + 9/9 new frontend flows passing.
 
+## Iteration 4 (2026-02-10)
+- ✅ Standard "complete website" pages for AdSense/SEO trust: `/about`, `/contact`, `/privacy`, `/terms`
+- ✅ `POST /api/contact` endpoint with validation, MongoDB persistence, and optional Resend admin notification (graceful stub fallback)
+- ✅ Footer expanded to 4-column layout with Company section; Navbar adds About + Contact; sitemap includes all new pages
+- ✅ Tested: 15/15 backend pytest + 8/8 frontend E2E pass
+
+## Iteration 5 (2026-02-13)
+- ✅ **Interactive in-browser product tour** at `/demo` — 6 auto-playing animated chapters: Sign-up, Fill form, Switch templates, AI assist, Tailor to JD, PDF & Share
+- ✅ Real UI components animated with CSS keyframes (typewriter, slide-up, scale-in, pulse-soft); progress bar with clickable chapter dots, play/pause, prev/next, replay
+- ✅ "Watch 50-second demo" CTA on landing hero; Navbar + Footer + sitemap updated
+- ✅ Tested: 11/11 frontend flows pass, zero console errors during playback
+
 ## Prioritized backlog
 ### P1 (next iteration)
 - Forgot/reset password flow UI pages (backend ready)
