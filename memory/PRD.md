@@ -72,6 +72,12 @@ Build a fast, modern, SEO-optimized resume builder SaaS for students, freshers, 
 - ✅ "Watch 50-second demo" CTA on landing hero; Navbar + Footer + sitemap updated
 - ✅ Tested: 11/11 frontend flows pass, zero console errors during playback
 
+## Iteration 6 (2026-02-13)
+- ✅ **Video-embed swap**: Demo player now supports a real YouTube or Vimeo recording via `REACT_APP_DEMO_VIDEO_URL` env var
+- ✅ When env URL is set, the animated canvas is replaced by a responsive iframe; chapter dots become **timestamp jumps** (start=8s, 18s, 26s, 35s, 45s); URL parser handles youtu.be / youtube.com / vimeo.com / player.vimeo.com
+- ✅ When env URL is empty, animated tour remains the default and an inline `data-testid='demo-video-hint'` tells the user exactly where to set the env var
+- ✅ Verified both modes via Playwright: animated mode + YouTube embed mode (iframe + chapter timestamp re-key)
+
 ## Prioritized backlog
 ### P1 (next iteration)
 - Forgot/reset password flow UI pages (backend ready)

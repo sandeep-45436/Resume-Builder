@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -8,23 +8,27 @@ import Creative from "@/templates/Creative";
 import Student from "@/templates/Student";
 import Corporate from "@/templates/Corporate";
 import { SAMPLE_RESUME } from "@/utils/resumeData";
+import { parseVideoUrl } from "@/utils/videoUrl";
 import { Play, Pause, RotateCcw, ChevronLeft, ChevronRight, Sparkles, Wand2, Download, Share2, Check, Loader2, ArrowRight, FileEdit } from "lucide-react";
 
 const CHAPTERS = [
-    { id: "signup", title: "Sign up & create", caption: "Land on the dashboard. Click 'New resume' — a blank canvas opens in your workspace." },
-    { id: "fill", title: "Fill the form", caption: "Type once on the left, watch the resume render on the right. No reloads, no copy-paste." },
-    { id: "templates", title: "Switch templates", caption: "One click cycles through five hand-crafted, ATS-friendly templates. Your data stays put." },
-    { id: "ai", title: "AI assist", caption: "Stuck on your summary? Generate with Claude. Need a sharper bullet? One click — done." },
-    { id: "tailor", title: "Tailor to a JD", caption: "Paste a job description. AI re-orders your skills and rewrites your weakest bullets to match — without inventing experience." },
-    { id: "export", title: "PDF & share", caption: "Download a crisp A4 PDF in one click. Or toggle a public share link recruiters can open instantly." },
+    { id: "signup", title: "Sign up & create", caption: "Land on the dashboard. Click 'New resume' — a blank canvas opens in your workspace.", start: 0 },
+    { id: "fill", title: "Fill the form", caption: "Type once on the left, watch the resume render on the right. No reloads, no copy-paste.", start: 8 },
+    { id: "templates", title: "Switch templates", caption: "One click cycles through five hand-crafted, ATS-friendly templates. Your data stays put.", start: 18 },
+    { id: "ai", title: "AI assist", caption: "Stuck on your summary? Generate with Claude. Need a sharper bullet? One click — done.", start: 26 },
+    { id: "tailor", title: "Tailor to a JD", caption: "Paste a job description. AI re-orders your skills and rewrites your weakest bullets to match — without inventing experience.", start: 35 },
+    { id: "export", title: "PDF & share", caption: "Download a crisp A4 PDF in one click. Or toggle a public share link recruiters can open instantly.", start: 45 },
 ];
 
-const CHAPTER_DURATION = 7200; // ms
+const CHAPTER_DURATION = 7200; // ms (animated mode only)
+const DEMO_VIDEO_URL = process.env.REACT_APP_DEMO_VIDEO_URL || "";
 
 export default function Demo() {
+    const video = useMemo(() => parseVideoUrl(DEMO_VIDEO_URL), []);
     const [chapterIdx, setChapterIdx] = useState(0);
     const [playing, setPlaying] = useState(true);
-    const [progress, setProgress] = useState(0); // 0..1 within current chapter
+    const [progress, setProgress] = useState(0); // 0..1 within current chapter (animated mode)
+    const [videoNonce, setVideoNonce] = useState(0); // bump to force iframe reload on chapter change
     const startedAt = useRef(Date.now());
     const rafRef = useRef(0);
 
@@ -34,6 +38,7 @@ export default function Demo() {
     }, []);
 
     useEffect(() => {
+        if (video) return; // video mode is controlled by the iframe; skip RAF tween
         if (!playing) return;
         startedAt.current = Date.now() - progress * CHAPTER_DURATION;
         const tick = () => {
@@ -56,12 +61,13 @@ export default function Demo() {
         rafRef.current = requestAnimationFrame(tick);
         return () => cancelAnimationFrame(rafRef.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [playing, chapterIdx]);
+    }, [playing, chapterIdx, video]);
 
     const goTo = (i) => {
         setChapterIdx(i);
         setProgress(0);
         setPlaying(true);
+        if (video) setVideoNonce((n) => n + 1);
     };
     const replay = () => goTo(0);
     const prev = () => goTo(Math.max(0, chapterIdx - 1));
@@ -80,8 +86,20 @@ export default function Demo() {
                 <div className="mt-10 bg-white border border-stone-200 overflow-hidden shadow-sm" data-testid="demo-player">
                     {/* SCENE */}
                     <div className="bg-stone-100 aspect-[16/9] relative overflow-hidden" data-testid={`demo-scene-${chapter.id}`}>
-                        <Scene id={chapter.id} progress={progress} />
-                        <div className="absolute top-4 left-4 bg-stone-950/85 text-white px-3 py-1.5 text-[10px] font-mono uppercase tracking-[0.25em] backdrop-blur">
+                        {video ? (
+                            <iframe
+                                key={`${video.id}-${chapterIdx}-${videoNonce}`}
+                                title="ResumeForge AI demo"
+                                src={video.embedUrlFor(chapter.start, true)}
+                                className="absolute inset-0 w-full h-full"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                allowFullScreen
+                                data-testid={`demo-video-iframe-${video.provider}`}
+                            />
+                        ) : (
+                            <Scene id={chapter.id} progress={progress} />
+                        )}
+                        <div className="absolute top-4 left-4 bg-stone-950/85 text-white px-3 py-1.5 text-[10px] font-mono uppercase tracking-[0.25em] backdrop-blur pointer-events-none">
                             Chapter {chapterIdx + 1} / {CHAPTERS.length} · {chapter.title}
                         </div>
                     </div>
@@ -95,9 +113,11 @@ export default function Demo() {
 
                     {/* CONTROLS */}
                     <div className="px-6 py-4 border-t border-stone-200 bg-stone-50 flex items-center gap-3">
-                        <button onClick={() => setPlaying((p) => !p)} className="w-9 h-9 bg-stone-900 text-white flex items-center justify-center hover:bg-stone-700" data-testid="demo-play-pause">
-                            {playing ? <Pause size={14} /> : <Play size={14} />}
-                        </button>
+                        {!video && (
+                            <button onClick={() => setPlaying((p) => !p)} className="w-9 h-9 bg-stone-900 text-white flex items-center justify-center hover:bg-stone-700" data-testid="demo-play-pause">
+                                {playing ? <Pause size={14} /> : <Play size={14} />}
+                            </button>
+                        )}
                         <button onClick={prev} disabled={chapterIdx === 0} className="w-9 h-9 bg-white border border-stone-200 flex items-center justify-center hover:border-stone-900 disabled:opacity-40" data-testid="demo-prev">
                             <ChevronLeft size={14} />
                         </button>
@@ -108,7 +128,7 @@ export default function Demo() {
                             <div className="flex gap-1.5">
                                 {CHAPTERS.map((c, i) => (
                                     <button key={c.id} onClick={() => goTo(i)} className="flex-1 h-1.5 bg-stone-200 relative overflow-hidden hover:bg-stone-300" data-testid={`demo-chapter-${i}`}>
-                                        <div className="absolute inset-y-0 left-0 bg-[#002FA7] transition-[width] duration-100 ease-linear" style={{ width: i < chapterIdx ? "100%" : i === chapterIdx ? `${progress * 100}%` : "0%" }} />
+                                        <div className="absolute inset-y-0 left-0 bg-[#002FA7] transition-[width] duration-100 ease-linear" style={{ width: i < chapterIdx ? "100%" : i === chapterIdx ? (video ? "100%" : `${progress * 100}%`) : "0%" }} />
                                     </button>
                                 ))}
                             </div>
@@ -123,6 +143,12 @@ export default function Demo() {
                         </button>
                     </div>
                 </div>
+
+                {!video && (
+                    <div className="mt-3 text-[11px] text-stone-500 font-mono" data-testid="demo-video-hint">
+                        Tip: set <code className="bg-stone-100 px-1 border border-stone-200">REACT_APP_DEMO_VIDEO_URL</code> in <code className="bg-stone-100 px-1 border border-stone-200">/app/frontend/.env</code> to a YouTube or Vimeo URL to replace this animated tour with your real recording — chapter timestamps still work.
+                    </div>
+                )}
 
                 <div className="mt-10 bg-stone-900 text-white p-8 flex flex-wrap items-center justify-between gap-4">
                     <div>
