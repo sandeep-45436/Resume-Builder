@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AdSlot from "@/components/AdSlot";
-import AffiliateCard from "@/components/AffiliateCard";
 import { TEMPLATES, SAMPLE_RESUME } from "@/utils/resumeData";
 import { getTemplate } from "@/templates";
 import { BLOG_POSTS } from "@/data/blog";
